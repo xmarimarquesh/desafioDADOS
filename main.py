@@ -1,4 +1,4 @@
-
+from itertools import permutations
 
 def mostrarMatriz(m):
     print("MATRIZ:")
@@ -7,81 +7,73 @@ def mostrarMatriz(m):
             print(m[i][j], end="   ")
         print("\n")
 
-def mostrarDirecoes(d):
-    for chave, valor in d.items():
-        print(f"{chave}: {valor}")
-
 def setarDirecaoDados(direcao):
-    for i in range(6):
-        if(direcao[i] != 8):
-            direcao[i] = direcao[i] + 1
-        else: 
-            direcao[i] = 0
+    combinacao = list(permutations(direcao, 6))
+    return combinacao
 
-    return direcao
+def mudarPosicao(matriz, direcao_dado, posicao, direcoes, coluna, linha, movimentos, dm):
 
-def mudarPosicao(matriz, direcao_dado, posicao, direcoes, x, y):
+    movimento_atual = direcoes[direcao_dado[posicao - 1]]
+    coluna += posicao * movimento_atual[0]
+    linha += posicao * movimento_atual[1]
     
-    x += posicao * direcoes[direcao_dado[posicao - 1]][0]
-    y += posicao * direcoes[direcao_dado[posicao - 1]][1]
+    movimentos.append(dm[direcao_dado[posicao - 1]])
 
-    if x > 7 or x < 0 or y > 7 or y < 0:
-        return -1
-    return (matriz[y][x], x, y)
+    # Verifica se nova posição está fora da matriz
+    if (coluna > 7 or coluna < 0) or (linha > 7 or linha < 0):
+        return (-1, -1, -1, -1)
+
+    return (matriz[linha][coluna], linha, coluna, movimentos)
 
 def main():
+    coluna = 0
+    linha = 0
     matriz = [
-        [6, 3, 1, 1, 2, 2, 3, 1],
-        [6, 4, 6, 3, 4, 2, 4, 1],
-        [3, 2, 4, 2, 4, 5, 2, 3],
-        [2, 4, 4, 4, 2, 1, 2, 3],
-        [1, 2, 3, 4, 2, 2, 2, 5],
-        [5, 5, 4, 4, 5, 1, 5, 5],
-        [3, 3, 4, 4, 3, 4, 2, 2],
-        [1, 2, 3, 6, 2, 4, 1, 2]
-    ]
+            [6, 3, 1, 1, 2, 2, 3, 1],
+            [6, 4, 6, 3, 4, 2, 4, 1],
+            [3, 2, 4, 2, 4, 5, 2, 3],
+            [2, 4, 4, 4, 2, 1, 2, 3],
+            [1, 2, 3, 4, 2, 2, 2, 5],
+            [5, 5, 4, 4, 5, 1, 5, 5],
+            [3, 3, 4, 4, 3, 4, 2, 2],
+            [1, 2, 3, 6, 2, 4, 1, 2]
+            ]
     
-    direcao_dado = [0, 0, 0, 0, 0, 0]
-    
-    # (COLUNA, LINHA)  -  (X, Y)
-    #           cima    baixo   esquerdo  direito diagDB   diagBE    diagDC  diagEC   
-    direcoes = [(0, 1), (0, -1), (-1, 0), (1, 0), (1, -1), (-1, -1), (1, 1), (-1, 1)]
-
-    #mostrarDirecoes(direcoes)
-    #mostrarDirecoes(direcao_dado)
+    # Direções como (coluna, linha) e nomes das direções
+    direcoes = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+    direcao_nome = ["cima", "baixo", "esquerdo", "direito", "diagDB", "diagBE", "diagDC", "diagEC"]
+    possiveis_direcoes = [0,1,2,3,4,5,6,7]
 
     print("----------INICIO----------\n")
+    coluna = 0
+    linha = 7
+    posicao = matriz[linha][coluna]
 
-    x = 0
-    y = 7
-    posicao = matriz[y][x]
+    todas_direcoes = setarDirecaoDados(possiveis_direcoes)
+    print("Possibilidades: ", len(todas_direcoes))
 
-    # print(f"Posicao inicial: {posicao}\n")	
+    for direcao_dado in todas_direcoes:
+        count = 0
+        posicao = matriz[linha][coluna]
+        movimentos = []
 
-    # direcao_dado = setarDirecaoDados(direcao_dado)
+        while True:
+            (posicao, linha, coluna, movimentos) = mudarPosicao(matriz, direcao_dado, posicao, direcoes, coluna, linha, movimentos, direcao_nome)
+            
+            if posicao == -1:
+                break
 
-    count = 0
-    while True:
-        print(f"pos({y},{x})")
-        print(f"matriz: {matriz[y][x]}")
+            count += 1
+            if count >= 64:
+                break
 
-        result = mudarPosicao(matriz, direcao_dado, posicao, direcoes, x, y)
-
-        if result == -1:
-            print("Quebrou")
-            break
-        
-        posicao = result[0]
-        x = result[1]
-        y = result[2]
-
-        count += 1
-        if(count >= 64):
-            break
-
-
+            if linha == 0 and coluna == 7 and posicao == 1:
+                print("CHEGOU!")
+                print("Movimentos realizados:", movimentos)
+                print("Direcao_dados:", direcao_dado)
+                break
 
     mostrarMatriz(matriz)
-
+    print("\nFim da combinação\n")
 
 main()
